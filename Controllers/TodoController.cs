@@ -14,14 +14,24 @@ namespace TodoApi.Controllers{
     public class TodoController : Controller
     {
 
-private ElasticClient _client;
-public TodoController()
-{
-    var settings = new ConnectionSettings(new Uri("http://localhost:9200"))
-    .DefaultIndex("todo");
+private static ElasticClient _client;
 
-    _client = new ElasticClient(settings);
-}
+        private static ElasticClient GetESClient()
+        {
+            
+                var settings = new ConnectionSettings(new Uri("http://localhost:9200"))
+                                    .DefaultIndex("todo");
+
+                return new ElasticClient(settings);
+        }        
+
+        public TodoController()
+        {
+            if (_client == null)
+            {
+                _client = GetESClient();
+            }
+        }
 
         // POST api/todo
         [HttpPost]
