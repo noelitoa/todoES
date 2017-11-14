@@ -54,8 +54,43 @@ private static ElasticClient _client;
         [HttpGet("{id}", Name = "GetTodo")]
         public IActionResult  Get(int id)
         {
-            var todoItem = new TodoItem() { Id = id, Name = "Todo # 1", IsComplete = true};
-            return Ok(todoItem);
+            //var todoItem = new TodoItem() { Id = id, Name = "Todo # 1", IsComplete = true};
+
+            var result = _client.Search<TodoItem>(s => s
+                    .Index("todo")
+                    .Type("todoitem")
+                    .From(0)
+                    .Size(1000)
+                    .Query(q => q.MatchAll()));
+
+            var listRequests = new List<TodoItem>();
+
+                foreach (var hit in result.Hits)
+                {
+                        listRequests.Add(new TodoItem()
+                        {
+                            Name = hit.Source.Name,
+                            IsComplete = hit.Source.IsComplete
+                        });
+                }
+
+            return Ok(listRequests);
+        }
+
+        // GET api/todo
+        [HttpGet( Name = "GetTodos")]
+        public IActionResult  GetAll(int id)
+        {
+            //var todoItem = new TodoItem() { Id = id, Name = "Todo # 1", IsComplete = true};
+
+            var result = _client.Search<TodoItem>(s => s
+                    .Index("todo")
+                    .Type("todoitem")
+                    .From(0)
+                    .Size(1000)
+                    .Query(q => q.MatchAll()));
+
+            return Ok(result);
         }
 
     }
